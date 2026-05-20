@@ -7,14 +7,26 @@ use Illuminate\Database\Eloquent\Model;
 class Club extends Model
 {
     protected $fillable = [
-        'nom',
-        'description',
-        'domaine',
-        'logo',
-        'statut',
-        'anneeCreation',
-        'responsable_id',
+    'nom',
+    'email',
+    'description',
+    'categorie',
+    'logo',
+    'statut',
+    'anneeCreation',
+    'parrain',
+    'president_nom',
+    'president_email',
+    'mot_president',
+    'nb_activites',
+    'nb_membres',
+    'membres_bureau',
+    'programme_annuel',
+    'responsable_id',
     ];
+    protected $casts = [
+    'membres_bureau' => 'array',
+     ];
 
     public function responsable()
     {

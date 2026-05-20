@@ -12,6 +12,7 @@ use App\Http\Controllers\ProgrammeAnnuelController;
 use App\Http\Controllers\InscriptionController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DemandeAdhesionController;
 
 // Routes publiques
 Route::post('register', [AuthController::class, 'register']);
@@ -33,7 +34,13 @@ Route::middleware('auth:sanctum')->group(function () {
     // Gestion
     Route::apiResource('utilisateurs', UtilisateurController::class);
     Route::apiResource('comptes', CompteController::class);
-    Route::apiResource('clubs', ClubController::class);
+
+    // Clubs — index et show sont publics, le reste est protégé
+    Route::post('clubs', [ClubController::class, 'store']);
+    Route::put('clubs/{id}', [ClubController::class, 'update']);
+    Route::patch('clubs/{id}', [ClubController::class, 'update']);
+    Route::delete('clubs/{id}', [ClubController::class, 'destroy']);
+
     Route::apiResource('annonces', AnnonceInstitutionnelleController::class);
     Route::apiResource('actualites', ActualiteController::class);
     Route::apiResource('evenements', EvenementController::class);
@@ -41,4 +48,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('programmes', ProgrammeAnnuelController::class);
     Route::apiResource('inscriptions', InscriptionController::class);
     Route::apiResource('medias', MediaController::class);
+
+    Route::post('/demandes-adhesion', [DemandeAdhesionController::class, 'store']);
+    Route::get('/demandes-adhesion', [DemandeAdhesionController::class, 'index']);
+    Route::patch('/demandes-adhesion/{id}/statut', [DemandeAdhesionController::class, 'updateStatut']);
 });

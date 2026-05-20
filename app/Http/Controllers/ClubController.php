@@ -9,7 +9,7 @@ class ClubController extends Controller
 {
     public function index()
     {
-        return response()->json(Club::with('responsable')->get());
+    return response()->json(Club::all());
     }
 
     public function store(Request $request)
@@ -23,13 +23,7 @@ class ClubController extends Controller
 
     public function show($id)
     {
-        return response()->json(Club::with([
-            'responsable',
-            'actualites',
-            'evenements',
-            'activites',
-            'programmes'
-        ])->findOrFail($id));
+        return response()->json(Club::findOrFail($id));
     }
 
     public function update(Request $request, $id)
