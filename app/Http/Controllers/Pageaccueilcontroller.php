@@ -16,12 +16,15 @@ class PageAccueilController extends Controller
      */
     public function index()
     {
+    try {
         if (!Storage::exists($this->jsonPath)) {
             return response()->json(null);
         }
-
         $content = json_decode(Storage::get($this->jsonPath), true);
         return response()->json($content);
+    } catch (\Exception $e) {
+        return response()->json(null);
+    }
     }
 
     /**
