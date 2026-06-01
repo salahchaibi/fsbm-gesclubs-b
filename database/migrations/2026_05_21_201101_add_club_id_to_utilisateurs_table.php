@@ -8,15 +8,15 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('evenements', function (Blueprint $table) {
-            $table->enum('statut', ['en_attente', 'valide', 'refuse'])->default('en_attente')->after('club_id');
+        Schema::table('utilisateurs', function (Blueprint $table) {
+            $table->foreignId('club_id')->nullable()->constrained('clubs')->onDelete('set null');
         });
     }
 
     public function down(): void
     {
-        Schema::table('evenements', function (Blueprint $table) {
-            $table->dropColumn('statut');
+        Schema::table('utilisateurs', function (Blueprint $table) {
+            $table->dropColumn('club_id');
         });
     }
 };

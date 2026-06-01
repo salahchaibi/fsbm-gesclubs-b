@@ -1,0 +1,25 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up()
+{
+    Schema::table('demandes_adhesion', function (Blueprint $table) {
+        $table->string('carte_etudiant')->nullable()->after('message');
+    });
+}
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('demandes_adhesion', function (Blueprint $table) {
+            //
+        });
+    }
+};

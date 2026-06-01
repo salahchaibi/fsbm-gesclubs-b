@@ -33,11 +33,18 @@ class UtilisateurController extends Controller
         return response()->json(Utilisateur::findOrFail($id));
     }
 
-    public function update(Request $request, $id)
-    {
-        $utilisateur = Utilisateur::findOrFail($id);
-        $utilisateur->update($request->all());
-        return response()->json($utilisateur);
+    public function update(Request $request, $id){
+    $utilisateur = Utilisateur::findOrFail($id);
+    $data = $request->all();
+    
+    if (!empty($data['motDePasse'])) {
+        $data['motDePasse'] = bcrypt($data['motDePasse']);
+    } else {
+        unset($data['motDePasse']);
+    }
+    
+    $utilisateur->update($data);
+    return response()->json($utilisateur);
     }
 
     public function destroy($id)

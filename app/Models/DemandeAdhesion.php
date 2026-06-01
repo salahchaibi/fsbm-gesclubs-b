@@ -10,7 +10,7 @@ class DemandeAdhesion extends Model
 
     protected $fillable = [
         'club_id', 'nom', 'prenom', 'email',
-        'telephone', 'filiere', 'message', 'statut',
+        'telephone', 'filiere', 'message', 'statut','code_apogee','carte_etudiant',
     ];
 
     public function club()

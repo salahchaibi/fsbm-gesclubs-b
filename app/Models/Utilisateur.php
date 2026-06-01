@@ -10,6 +10,7 @@ class Utilisateur extends Authenticatable
     use HasApiTokens;
 
     protected $table = 'utilisateurs';
+    protected $authPasswordName = 'motDePasse';
 
     protected $fillable = [
         'nom',
@@ -20,6 +21,7 @@ class Utilisateur extends Authenticatable
         'dateCreation',
         'statut',
         'role',
+        'club_id',
     ];
 
     protected $hidden = [
@@ -28,9 +30,7 @@ class Utilisateur extends Authenticatable
 
     protected function casts(): array
     {
-        return [
-            'motDePasse' => 'hashed',
-        ];
+        return [];
     }
 
     public function club()

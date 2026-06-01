@@ -12,6 +12,8 @@ class Actualite extends Model
         'image',
         'categorie',
         'club_id',
+        'instagram',
+        'date',
     ];
 
     public function club()

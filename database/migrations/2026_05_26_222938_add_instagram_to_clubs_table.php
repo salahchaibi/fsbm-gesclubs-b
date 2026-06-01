@@ -8,15 +8,15 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('evenements', function (Blueprint $table) {
-            $table->enum('statut', ['en_attente', 'valide', 'refuse'])->default('en_attente')->after('club_id');
+        Schema::table('clubs', function (Blueprint $table) {
+            $table->string('instagram')->nullable()->after('email');
         });
     }
 
     public function down(): void
     {
-        Schema::table('evenements', function (Blueprint $table) {
-            $table->dropColumn('statut');
+        Schema::table('clubs', function (Blueprint $table) {
+            $table->dropColumn('instagram');
         });
     }
 };

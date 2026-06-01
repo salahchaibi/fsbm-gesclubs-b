@@ -6,22 +6,24 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::create('demandes_adhesion', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
+        Schema::table('demandes_adhesion', function (Blueprint $table) {
+            $table->foreignId('club_id')->constrained('clubs')->onDelete('cascade');
+            $table->string('nom');
+            $table->string('prenom');
+            $table->string('email');
+            $table->string('telephone')->nullable();
+            $table->string('filiere')->nullable();
+            $table->text('message')->nullable();
+            $table->enum('statut', ['en_attente', 'accepte', 'refuse'])->default('en_attente');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('demandes_adhesion');
+        Schema::table('demandes_adhesion', function (Blueprint $table) {
+            $table->dropColumn(['club_id','nom','prenom','email','telephone','filiere','message','statut']);
+        });
     }
 };

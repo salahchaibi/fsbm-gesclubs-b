@@ -7,14 +7,15 @@ use Illuminate\Database\Eloquent\Model;
 class Evenement extends Model
 {
     protected $fillable = [
-        'titre',
-        'contenu',
-        'image',
-        'date',
-        'lieu',
-        'heure',
-        'affiche',
-        'club_id',
+    'titre',
+    'contenu',
+    'image',
+    'date',
+    'lieu',
+    'heure',
+    'affiche',
+    'club_id',
+    'statut',
     ];
 
     public function club()

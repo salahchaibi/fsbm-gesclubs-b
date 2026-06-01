@@ -9,7 +9,9 @@ class Club extends Model
     protected $fillable = [
     'nom',
     'email',
+    'instagram',
     'description',
+    'domaine',
     'categorie',
     'logo',
     'statut',
@@ -23,7 +25,7 @@ class Club extends Model
     'membres_bureau',
     'programme_annuel',
     'responsable_id',
-    ];
+  ];
     protected $casts = [
     'membres_bureau' => 'array',
      ];
