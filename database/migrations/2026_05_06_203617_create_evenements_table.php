@@ -8,15 +8,23 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('evenements', function (Blueprint $table) {
-            $table->enum('statut', ['en_attente', 'valide', 'refuse'])->default('en_attente')->after('club_id');
+        Schema::create('evenements', function (Blueprint $table) {
+            $table->id();
+            $table->string('titre');
+            $table->text('contenu')->nullable();
+            $table->string('image')->nullable();
+            $table->date('date')->nullable();
+            $table->string('lieu')->nullable();
+            $table->string('heure')->nullable();
+            $table->string('affiche')->nullable();
+            $table->enum('statut', ['en_attente', 'valide', 'refuse'])->default('en_attente');
+            $table->foreignId('club_id')->constrained('clubs')->onDelete('cascade');
+            $table->timestamps();
         });
     }
 
     public function down(): void
     {
-        Schema::table('evenements', function (Blueprint $table) {
-            $table->dropColumn('statut');
-        });
+        Schema::dropIfExists('evenements');
     }
 };
