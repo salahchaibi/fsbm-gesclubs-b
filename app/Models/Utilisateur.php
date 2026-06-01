@@ -11,6 +11,10 @@ class Utilisateur extends Authenticatable
 
     protected $table = 'utilisateurs';
     protected $authPasswordName = 'motDePasse';
+    public function getAuthPassword()
+    {
+    return $this->motDePasse;
+    }
 
     protected $fillable = [
         'nom',
