@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class PageAccueilController extends Controller
 {
@@ -28,10 +28,11 @@ class PageAccueilController extends Controller
             $section = $request->input('section');
             $data = json_decode($request->input('data', '{}'), true) ?? [];
 
-            // Gérer les fichiers uploadés
             foreach ($request->allFiles() as $key => $file) {
-                $path = $file->store('page_accueil', 'public');
-                $data[$key] = '/storage/' . $path;
+                $result = Cloudinary::upload($file->getRealPath(), [
+                    'folder' => 'fsbm/page_accueil',
+                ]);
+                $data[$key] = $result->getSecurePath();
             }
 
             DB::table('page_accueil')->updateOrInsert(
