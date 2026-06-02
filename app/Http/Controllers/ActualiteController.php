@@ -38,6 +38,8 @@ class ActualiteController extends Controller
     {
         $request->validate(['titre' => 'required|string']);
         $data = $request->except(['image']);
+        \Log::info('Files reçus: ' . json_encode(array_keys($request->allFiles())));
+        \Log::info('Has image: ' . ($request->hasFile('image') ? 'oui' : 'non'));
 
         if ($request->hasFile('image')) {
             $url = $this->uploadToCloudinary($request->file('image'));
