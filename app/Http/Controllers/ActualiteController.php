@@ -9,23 +9,24 @@ use Illuminate\Support\Facades\Http;
 class ActualiteController extends Controller
 {
     private function uploadToCloudinary($file)
-    {
-        $cloudName = env('CLOUDINARY_CLOUD_NAME');
-        $apiKey = env('CLOUDINARY_API_KEY');
-        $apiSecret = env('CLOUDINARY_API_SECRET');
-        $timestamp = time();
-        $signature = sha1("folder=fsbm/actualites&timestamp={$timestamp}{$apiSecret}");
+   {
+    $cloudName = env('CLOUDINARY_CLOUD_NAME');
+    $apiKey = env('CLOUDINARY_API_KEY');
+    $apiSecret = env('CLOUDINARY_API_SECRET');
+    $timestamp = time();
+    $signature = sha1("folder=fsbm/actualites&timestamp={$timestamp}{$apiSecret}");
 
-        $response = Http::attach(
-            'file', file_get_contents($file->getRealPath()), $file->getClientOriginalName()
-        )->post("https://api.cloudinary.com/v1_1/{$cloudName}/image/upload", [
-            'api_key'   => $apiKey,
-            'timestamp' => $timestamp,
-            'signature' => $signature,
-            'folder'    => 'fsbm/actualites',
-        ]);
+    $response = Http::attach(
+        'file', file_get_contents($file->getRealPath()), $file->getClientOriginalName()
+    )->post("https://api.cloudinary.com/v1_1/{$cloudName}/image/upload", [
+        'api_key'   => $apiKey,
+        'timestamp' => $timestamp,
+        'signature' => $signature,
+        'folder'    => 'fsbm/actualites',
+    ]);
 
-        return $response->json()['secure_url'] ?? null;
+    \Log::info('Cloudinary response: ' . json_encode($response->json()));
+    return $response->json()['secure_url'] ?? null;
     }
 
     public function index()
