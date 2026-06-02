@@ -1,0 +1,1 @@
+web: php artisan optimize:clear && php artisan migrate --force && /start-container.sh
