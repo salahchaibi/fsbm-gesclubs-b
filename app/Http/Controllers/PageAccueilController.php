@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 
 class PageAccueilController extends Controller
 {
@@ -21,26 +22,36 @@ class PageAccueilController extends Controller
         }
     }
 
+    private function uploadToCloudinary($file)
+    {
+        $cloudName = env('CLOUDINARY_CLOUD_NAME');
+        $apiKey = env('CLOUDINARY_API_KEY');
+        $apiSecret = env('CLOUDINARY_API_SECRET');
+
+        $timestamp = time();
+        $signature = sha1("folder=fsbm/page_accueil&timestamp={$timestamp}{$apiSecret}");
+
+        $response = Http::attach(
+            'file', file_get_contents($file->getRealPath()), $file->getClientOriginalName()
+        )->post("https://api.cloudinary.com/v1_1/{$cloudName}/image/upload", [
+            'api_key'   => $apiKey,
+            'timestamp' => $timestamp,
+            'signature' => $signature,
+            'folder'    => 'fsbm/page_accueil',
+        ]);
+
+        return $response->json()['secure_url'] ?? null;
+    }
+
     public function store(Request $request)
     {
         try {
             $section = $request->input('section');
             $data = json_decode($request->input('data', '{}'), true) ?? [];
 
-            // Upload chaque fichier sur Cloudinary
             foreach ($request->allFiles() as $key => $file) {
-                $cloudinary = new \Cloudinary\Cloudinary([
-                    'cloud' => [
-                        'cloud_name' => env('CLOUDINARY_CLOUD_NAME'),
-                        'api_key'    => env('CLOUDINARY_API_KEY'),
-                        'api_secret' => env('CLOUDINARY_API_SECRET'),
-                    ],
-                    'url' => ['secure' => true],
-                ]);
-                $result = $cloudinary->uploadApi()->upload($file->getRealPath(), [
-                    'folder' => 'fsbm/page_accueil',
-                ]);
-                $data[$key] = $result['secure_url'];
+                $url = $this->uploadToCloudinary($file);
+                if ($url) $data[$key] = $url;
             }
 
             DB::table('page_accueil')->updateOrInsert(
@@ -50,7 +61,7 @@ class PageAccueilController extends Controller
 
             return response()->json(['success' => true, 'data' => $data]);
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()], 500);
+            return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 }
