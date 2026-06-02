@@ -4,10 +4,30 @@ namespace App\Http\Controllers;
 
 use App\Models\Evenement;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Http;
 
 class EvenementController extends Controller
 {
+    private function uploadToCloudinary($file)
+    {
+        $cloudName = env('CLOUDINARY_CLOUD_NAME');
+        $apiKey = env('CLOUDINARY_API_KEY');
+        $apiSecret = env('CLOUDINARY_API_SECRET');
+        $timestamp = time();
+        $signature = sha1("folder=fsbm/evenements&timestamp={$timestamp}{$apiSecret}");
+
+        $response = Http::attach(
+            'file', file_get_contents($file->getRealPath()), $file->getClientOriginalName()
+        )->post("https://api.cloudinary.com/v1_1/{$cloudName}/image/upload", [
+            'api_key'   => $apiKey,
+            'timestamp' => $timestamp,
+            'signature' => $signature,
+            'folder'    => 'fsbm/evenements',
+        ]);
+
+        return $response->json()['secure_url'] ?? null;
+    }
+
     public function index()
     {
         return response()->json(Evenement::with('club')->get());
@@ -23,8 +43,8 @@ class EvenementController extends Controller
         $data = $request->except(['image']);
 
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('evenements', 'public');
-            $data['image'] = $path;
+            $url = $this->uploadToCloudinary($request->file('image'));
+            if ($url) $data['image'] = $url;
         }
 
         $evenement = Evenement::create($data);
@@ -42,11 +62,8 @@ class EvenementController extends Controller
         $data = $request->except(['image', '_method']);
 
         if ($request->hasFile('image')) {
-            if ($evenement->image && Storage::disk('public')->exists($evenement->image)) {
-                Storage::disk('public')->delete($evenement->image);
-            }
-            $path = $request->file('image')->store('evenements', 'public');
-            $data['image'] = $path;
+            $url = $this->uploadToCloudinary($request->file('image'));
+            if ($url) $data['image'] = $url;
         }
 
         $evenement->update($data);
@@ -55,11 +72,7 @@ class EvenementController extends Controller
 
     public function destroy($id)
     {
-        $evenement = Evenement::findOrFail($id);
-        if ($evenement->image && Storage::disk('public')->exists($evenement->image)) {
-            Storage::disk('public')->delete($evenement->image);
-        }
-        $evenement->delete();
+        Evenement::findOrFail($id)->delete();
         return response()->json(['message' => 'Événement supprimé']);
     }
 }

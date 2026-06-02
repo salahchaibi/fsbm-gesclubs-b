@@ -4,10 +4,30 @@ namespace App\Http\Controllers;
 
 use App\Models\Actualite;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Http;
 
 class ActualiteController extends Controller
 {
+    private function uploadToCloudinary($file)
+    {
+        $cloudName = env('CLOUDINARY_CLOUD_NAME');
+        $apiKey = env('CLOUDINARY_API_KEY');
+        $apiSecret = env('CLOUDINARY_API_SECRET');
+        $timestamp = time();
+        $signature = sha1("folder=fsbm/actualites&timestamp={$timestamp}{$apiSecret}");
+
+        $response = Http::attach(
+            'file', file_get_contents($file->getRealPath()), $file->getClientOriginalName()
+        )->post("https://api.cloudinary.com/v1_1/{$cloudName}/image/upload", [
+            'api_key'   => $apiKey,
+            'timestamp' => $timestamp,
+            'signature' => $signature,
+            'folder'    => 'fsbm/actualites',
+        ]);
+
+        return $response->json()['secure_url'] ?? null;
+    }
+
     public function index()
     {
         return response()->json(Actualite::with('club')->latest()->get());
@@ -15,15 +35,12 @@ class ActualiteController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'titre' => 'required|string',
-        ]);
-
+        $request->validate(['titre' => 'required|string']);
         $data = $request->except(['image']);
 
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('actualites', 'public');
-            $data['image'] = $path;
+            $url = $this->uploadToCloudinary($request->file('image'));
+            if ($url) $data['image'] = $url;
         }
 
         $actualite = Actualite::create($data);
@@ -41,11 +58,8 @@ class ActualiteController extends Controller
         $data = $request->except(['image', '_method']);
 
         if ($request->hasFile('image')) {
-            if ($actualite->image && Storage::disk('public')->exists($actualite->image)) {
-                Storage::disk('public')->delete($actualite->image);
-            }
-            $path = $request->file('image')->store('actualites', 'public');
-            $data['image'] = $path;
+            $url = $this->uploadToCloudinary($request->file('image'));
+            if ($url) $data['image'] = $url;
         }
 
         $actualite->update($data);
@@ -54,11 +68,7 @@ class ActualiteController extends Controller
 
     public function destroy($id)
     {
-        $actualite = Actualite::findOrFail($id);
-        if ($actualite->image && Storage::disk('public')->exists($actualite->image)) {
-            Storage::disk('public')->delete($actualite->image);
-        }
-        $actualite->delete();
+        Actualite::findOrFail($id)->delete();
         return response()->json(['message' => 'Actualité supprimée']);
     }
 }
