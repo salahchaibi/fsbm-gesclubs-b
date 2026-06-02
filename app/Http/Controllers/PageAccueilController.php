@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class PageAccueilController extends Controller
 {
@@ -28,11 +27,20 @@ class PageAccueilController extends Controller
             $section = $request->input('section');
             $data = json_decode($request->input('data', '{}'), true) ?? [];
 
+            // Upload chaque fichier sur Cloudinary
             foreach ($request->allFiles() as $key => $file) {
-                $result = Cloudinary::upload($file->getRealPath(), [
+                $cloudinary = new \Cloudinary\Cloudinary([
+                    'cloud' => [
+                        'cloud_name' => env('CLOUDINARY_CLOUD_NAME'),
+                        'api_key'    => env('CLOUDINARY_API_KEY'),
+                        'api_secret' => env('CLOUDINARY_API_SECRET'),
+                    ],
+                    'url' => ['secure' => true],
+                ]);
+                $result = $cloudinary->uploadApi()->upload($file->getRealPath(), [
                     'folder' => 'fsbm/page_accueil',
                 ]);
-                $data[$key] = $result->getSecurePath();
+                $data[$key] = $result['secure_url'];
             }
 
             DB::table('page_accueil')->updateOrInsert(
@@ -40,7 +48,7 @@ class PageAccueilController extends Controller
                 ['data' => json_encode($data), 'updated_at' => now(), 'created_at' => now()]
             );
 
-            return response()->json(['success' => true, 'section' => $section, 'data' => $data]);
+            return response()->json(['success' => true, 'data' => $data]);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
