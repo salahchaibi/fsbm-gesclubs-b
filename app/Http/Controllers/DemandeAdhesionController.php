@@ -88,7 +88,7 @@ class DemandeAdhesionController extends Controller
             }
 
             Mail::html($contenu, function ($message) use ($demande, $sujet) {
-                $message->to($demande->email, $demande->prenom . ' ' . $demande->nom)->subject($sujet);
+                $message->to('naggourdouaa@gmail.com', $demande->prenom . ' ' . $demande->nom)->subject($sujet);
             });
         } catch (\Exception $e) {
             \Log::error('Email envoi échoué: ' . $e->getMessage());
