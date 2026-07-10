@@ -1,4 +1,4 @@
-FROM php:8.3-fpm
+FROM php:8.3-apache
 
 RUN apt-get update && apt-get install -y \
     git \
@@ -25,16 +25,23 @@ RUN composer install \
     --optimize-autoloader \
     --no-interaction
 
- 
-
 COPY . .
 
-RUN php artisan package:discover --ansi
+# Enable Apache rewrite module
+RUN a2enmod rewrite
+
+# Set Laravel public directory as DocumentRoot
+RUN sed -i 's!/var/www/html!/var/www/html/public!g' \
+    /etc/apache2/sites-available/000-default.conf
+
+# Laravel commands
+RUN php artisan package:discover --ansi 
 RUN php artisan storage:link 
+RUN php artisan optimize:clear 
 
+# Permissions
 RUN chown -R www-data:www-data storage bootstrap/cache
-RUN php artisan optimize:clear
 
-EXPOSE 9000
+EXPOSE 80
 
-CMD ["php-fpm"]
+CMD ["apache2-foreground"]
