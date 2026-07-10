@@ -23,21 +23,27 @@ class ActualiteController extends Controller
         return response()->json(Actualite::with('club')->latest()->get());
     }
 
-     public function store(Request $request)
-{
-    $request->validate(['titre' => 'required|string']);
-    $data = $request->except(['image']);
-    
-    if ($request->hasFile('image')) {
-        $url = $this->uploadImage($request->file('image'));
-        if ($url) $data['image'] = $url;
-    } elseif ($request->filled('image')) {
-        $data['image'] = $request->input('image');
+    public function show($id)
+    {
+        $actualite = Actualite::with('club')->findOrFail($id);
+        return response()->json($actualite);
     }
-    
-    $actualite = Actualite::create($data);
-    return response()->json($actualite->load('club'), 201);
-}
+
+     public function store(Request $request)
+    {
+        $request->validate(['titre' => 'required|string']);
+        $data = $request->except(['image']);
+        
+        if ($request->hasFile('image')) {
+            $url = $this->uploadImage($request->file('image'));
+            if ($url) $data['image'] = $url;
+        } elseif ($request->filled('image')) {
+            $data['image'] = $request->input('image');
+        }
+        
+        $actualite = Actualite::create($data);
+        return response()->json($actualite->load('club'), 201);
+    }
 
     public function update(Request $request, $id)
     {
